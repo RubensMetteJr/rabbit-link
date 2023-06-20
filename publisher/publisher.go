@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+//Get the enviroment varaibles passed into the container, using the "os" library
 var rabbit_host = os.Getenv("RABBIT_HOST")
 var rabbit_port = os.Getenv("RABBIT_PORT") 
 var rabbit_user = os.Getenv("RABBIT_USERNAME")
@@ -16,9 +17,10 @@ var rabbit_password = os.Getenv("RABBIT_PASSWORD")
 
 func main() {
 
+	//create router instance
 	router := httprouter.New()
 
-	router.POST("/publish/:message", func(w http.ResponseWriter, r *http.Request, p httprouter.Params){
+	router.POST("/send/:message", func(w http.ResponseWriter, r *http.Request, p httprouter.Params){
 		submit(w,r,p)
 	})
 
@@ -27,16 +29,19 @@ func main() {
 }
 
 func submit(writer http.ResponseWriter, request *http.Request, p httprouter.Params) {
+	//Retrieve the value inside the parameter
 	message := p.ByName("message")
 	
 	fmt.Println("Received message: " + message)
 
+	//Stablish queue connection
 	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" +rabbit_password + "@" + rabbit_host + ":" + rabbit_port +"/")
 
 	if err != nil {
 		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
 	}
 
+	//Close connection when outer func is over
 	defer conn.Close()
 
 	ch, err := conn.Channel()
@@ -45,9 +50,11 @@ func submit(writer http.ResponseWriter, request *http.Request, p httprouter.Para
 		log.Fatalf("%s: %s", "Failed to open a channel", err)
 	}
 
+	//Close the channel when outer func is over
 	defer ch.Close()
 
-	q, err := ch.QueueDeclare(
+	//Declare the RabbitMQ queue
+	queue, err := ch.QueueDeclare(
 		"publisher", // name
 		true,   // durable
 		false,   // delete when unused
@@ -60,9 +67,10 @@ func submit(writer http.ResponseWriter, request *http.Request, p httprouter.Para
 		log.Fatalf("%s: %s", "Failed to declare a queue", err)
 	}
 
+	//Publish the queue in the channel
 	err = ch.Publish(
 		"",     // exchange
-		q.Name, // routing key
+		queue.Name, // routing key
 		false,  // mandatory
 		false,  // immediate
 		amqp.Publishing {
