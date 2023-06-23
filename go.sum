@@ -1,0 +1,10 @@
+github.com/RubensMetteJr/rabbit-link/consumer v0.0.0-20230623194927-35093390add6 h1:x78iWEVY4XImm4bgAjzaIViknbbGgRS/xQDgisH/D2g=
+github.com/RubensMetteJr/rabbit-link/consumer v0.0.0-20230623194927-35093390add6/go.mod h1:onVA/j0qxx+sx4taXef03e94xJOjdtxCYiURE16p1IE=
+github.com/RubensMetteJr/rabbit-link/publisher v0.0.0-20230623194927-35093390add6 h1:p+Fb5KFiM/IqJ9kdcE+fw31uPwsG9rgAdNrCoOdq7wk=
+github.com/RubensMetteJr/rabbit-link/publisher v0.0.0-20230623194927-35093390add6/go.mod h1:nxbzM7X4LkhfQZOW1/rLXBGBiUuh9GTqy/m9pn9FGCU=
+github.com/RubensMetteJr/rabbit-link/rabbitmq v0.0.0-20230623194927-35093390add6 h1:MJvx03Fy1fJxAQ3imJBKJLXR4Pj566w5hbRiKE73Wpo=
+github.com/RubensMetteJr/rabbit-link/rabbitmq v0.0.0-20230623194927-35093390add6/go.mod h1:a2JMQS/yYj6zsV5viCaWYHD94nWCaPZuBaIF5jTrPA0=
+github.com/streadway/amqp v1.0.0 h1:kuuDrUJFZL1QYL9hUNuCxNObNzB0bV/ZG5jV3RWAQgo=
+github.com/streadway/amqp v1.0.0/go.mod h1:AZpEONHx3DKn8O/DFsRAY58/XVQiIPMTMB1SddzLXVw=
+github.com/streadway/amqp v1.1.0 h1:py12iX8XSyI7aN/3dUT8DFIDJazNJsVJdxNVEpnQTZM=
+github.com/streadway/amqp v1.1.0/go.mod h1:WYSrTEYHOXHd0nwFeUXAe2G2hRnQT+deZJJf88uS9Bg=

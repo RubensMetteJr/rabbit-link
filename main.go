@@ -5,7 +5,6 @@ import ("bufio"
 "log"
 "os"
 "strings"
-
 "github.com/RubensMetteJr/rabbit-link/rabbitmq"
 "github.com/RubensMetteJr/rabbit-link/publisher"
 "github.com/RubensMetteJr/rabbit-link/consumer"

@@ -2,7 +2,6 @@ package rabbitmq
 
 import (
 	"github.com/streadway/amqp"
-	"log"
 	"os"
 )
 

@@ -2,7 +2,6 @@ package consumer
 
 import (
 	"log"
-
 	"github.com/streadway/amqp"
 )
 

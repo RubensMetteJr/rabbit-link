@@ -3,10 +3,9 @@ package publisher
 import (
 	"bufio"
 	"fmt"
-	"log"
+	
 	"strings"
 
-	"github.com/streadway/amqp"
 )
 
 func PublishMessages(ch *amqp.Channel, reader *bufio.Reader) error {
