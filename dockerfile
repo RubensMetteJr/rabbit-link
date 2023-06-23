@@ -9,18 +9,13 @@ RUN apk add --no-cache git
 #Create a working directory, where all subsequent commands will be run
 WORKDIR /src 
 
-#Copy this files from the dockerfile directory to the container working directory (/src)
-COPY go.mod ./
-COPY go.sum ./
-
-#This commands downloads the modules copied before
-RUN go mod download
+RUN go mod init github.com/RubensMetteJr/rabbit-link
 
 #Here we copy the app written in go to the /src directory inside the container
-COPY publisher.go ./
+COPY main.go ./
 
 #Now we build the previus copied go app
-RUN go build publisher.go
+RUN go build main.go
 
 #RUNTIME BLOCK!
 
@@ -28,7 +23,7 @@ RUN go build publisher.go
 FROM alpine as runtime
 
 #Copy the binary code generated in the build phase (publisher)
-COPY --from=build /src/publisher /app/publisher
+COPY --from=build /src/main /app/main
 
 #Run on cmd the publisher binary as soon as the container is started
-CMD [ "/app/publisher" ]
+CMD [ "/app/main" ]

@@ -1,7 +1,5 @@
-module publisherMod
-
-go 1.16
+module github.com/RubensMetteJr/rabbit-link/publisher
 
 require (
-	github.com/streadway/amqp v1.0.0
+    github.com/streadway/amqp v1.0.0
 )
