@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 	"os"
+	"log"
 )
 
 //Get the enviroment varaibles passed into the container, using the "os" library

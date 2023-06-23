@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strings"
-
 	"github.com/streadway/amqp"
 )
 
@@ -19,7 +18,7 @@ var rabbit_password = os.Getenv("RABBIT_PASSWORD")
 func main() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// Establish queue connection
+	// Establish RabbitMQ connection
 	conn, err := amqp.Dial("amqp://" + rabbit_user + ":" + rabbit_password + "@" + rabbit_host + ":" + rabbit_port + "/")
 	if err != nil {
 		log.Fatalf("%s: %s", "Failed to connect to RabbitMQ", err)
@@ -32,45 +31,113 @@ func main() {
 	}
 	defer ch.Close()
 
-	// Declare the RabbitMQ queue
-	queue, err := ch.QueueDeclare(
-		"publisher", // name
-		true,        // durable
-		false,       // delete when unused
-		false,       // exclusive
-		false,       // no-wait
-		nil,         // arguments
+	fmt.Print("Enter your nickname: ")
+	nickname, err := reader.ReadString('\n')
+	if err != nil {
+		log.Println("Error reading nickname:", err)
+		return
+	}
+	nickname = strings.TrimSpace(nickname)
+
+	// Declare the RabbitMQ queue for consuming
+	consumeQueue, err := ch.QueueDeclare(
+		nickname, // name
+		true,     // durable
+		false,    // delete when unused
+		false,    // exclusive
+		false,    // no-wait
+		nil,      // arguments
 	)
 	if err != nil {
-		log.Fatalf("%s: %s", "Failed to declare a queue", err)
+		log.Fatalf("%s: %s", "Failed to declare a consume queue", err)
 	}
 
-	for {
-		fmt.Print("Enter a message to send: ")
-		message, err := reader.ReadString('\n')
+	// Create a channel to receive consumed messages
+	messages, err := ch.Consume(
+		consumeQueue.Name, // queue
+		"",                // consumer
+		false,             // auto-ack
+		false,             // exclusive
+		false,             // no-local
+		false,             // no-wait
+		nil,               // args
+	)
+	if err != nil {
+		log.Fatalf("%s: %s", "Failed to register consumer", err)
+	}
+
+	forever := make(chan bool)
+
+	// Goroutine to publish messages
+	go func() {
+		fmt.Print("Enter the queue name to publish messages to: ")
+		queueName, err := reader.ReadString('\n')
 		if err != nil {
 			log.Println("Error reading input:", err)
-			continue
+			return
 		}
 
-		// Trim any leading/trailing whitespaces and newlines from the message
-		message = strings.TrimSpace(message)
+		// Trim any leading/trailing whitespaces and newlines from the queue name
+		queueName = strings.TrimSpace(queueName)
 
-		// Publish the message to the queue
-		err = ch.Publish(
-			"",          // exchange
-			queue.Name,  // routing key
-			false,       // mandatory
-			false,       // immediate
-			amqp.Publishing{
-				ContentType: "text/plain",
-				Body:        []byte(message),
-			},
+		// Declare the RabbitMQ queue for publishing
+		publishQueue, err := ch.QueueDeclare(
+			queueName, // name
+			true,      // durable
+			false,     // delete when unused
+			false,     // exclusive
+			false,     // no-wait
+			nil,       // arguments
 		)
 		if err != nil {
-			log.Fatalf("%s: %s", "Failed to publish a message", err)
+			log.Fatalf("%s: %s", "Failed to declare a publish queue", err)
 		}
 
-		fmt.Println("Publish success!")
-	}
+		for {
+			fmt.Print("Enter a message to send (or type 'exit' to quit): ")
+			message, err := reader.ReadString('\n')
+			if err != nil {
+				log.Println("Error reading input:", err)
+				continue
+			}
+
+			// Trim any leading/trailing whitespaces and newlines from the message
+			message = strings.TrimSpace(message)
+
+			if message == "exit" {
+				break
+			}
+
+			// Publish the message to the publish queue
+			err = ch.Publish(
+				"",               // exchange
+				publishQueue.Name, // routing key (queue name)
+				false,            // mandatory
+				false,            // immediate
+				amqp.Publishing{
+					ContentType: "text/plain",
+					Body:        []byte(message),
+				},
+			)
+			if err != nil {
+				log.Fatalf("%s: %s", "Failed to publish a message", err)
+			}
+
+			fmt.Println("Publish success!")
+		}
+	}()
+
+	// Goroutine to consume messages
+	go func() {
+		// Loop to check the messages incoming in the consume queue
+		for d := range messages {
+			log.Printf("Received a message: %s", d.Body)
+
+			// Acknowledge the message
+			d.Ack(false)
+		}
+	}()
+
+	fmt.Println("Running...")
+	<-forever
 }
